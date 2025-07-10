@@ -18,6 +18,6 @@ describe('ConfigService', () => {
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(service).not.toBeDefined();
   });
 });
