@@ -14,7 +14,7 @@ export class ConfigService {
     private readonly logger: PinoLogger,
   ) {}
 
-  getPort(): number {
+  get port(): number {
     const port = this.nestConfigService.get<number>('PORT') || DEFAULT_PORT;
     let parsedPort = Number(port);
 
@@ -28,7 +28,7 @@ export class ConfigService {
     return parsedPort;
   }
 
-  getCorsConfig(): Record<string, any> {
+  get corsConfig(): Record<string, any> {
     const corsOrigin = this.nestConfigService.get<string>('CORS_ORIGIN');
 
     if (!corsOrigin) {
@@ -52,5 +52,33 @@ export class ConfigService {
       DEFAULT_CORS_METHODS;
 
     return { origins, methods };
+  }
+
+  get googleSecrets(): {
+    clientId: string;
+    clientSecret: string;
+    callbackUrl: string;
+  } {
+    const clientId = this.nestConfigService.get<string>('GOOGLE_CLIENT_ID');
+    const clientSecret = this.nestConfigService.get<string>(
+      'GOOGLE_CLIENT_SECRET',
+    );
+    const callbackUrl = this.nestConfigService.get<string>(
+      'GOOGLE_CALLBACK_URL',
+    );
+
+    if (!clientId || !clientSecret || !callbackUrl) {
+      this.logger.error('Google OAuth configuration is incomplete.');
+      throw new Error('Google OAuth configuration is incomplete.');
+    }
+
+    return { clientId, clientSecret, callbackUrl };
+  }
+
+  get authRedirectUrl(): string {
+    const redirectUrl =
+      this.nestConfigService.get<string>('AUTH_REDIRECT_URL') ?? '';
+
+    return redirectUrl;
   }
 }

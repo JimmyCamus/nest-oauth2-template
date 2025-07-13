@@ -9,7 +9,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  app.enableCors(configService.getCorsConfig());
+  app.enableCors(configService.corsConfig);
 
   app.useLogger(app.get(Logger));
 
@@ -17,7 +17,7 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  const port = configService.getPort();
+  const port = configService.port;
 
   logger.log(`Application is running on port: ${port}`, 'Bootstrap');
   await app.listen(port);
