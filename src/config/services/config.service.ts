@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { ConfigService as NestConfigService } from '@nestjs/config';
+import { OauthProvider } from '../types/types';
 
 const DEFAULT_PORT = 8000;
 const DEFAULT_CORS_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'];
@@ -59,20 +60,11 @@ export class ConfigService {
     clientSecret: string;
     callbackUrl: string;
   } {
-    const clientId = this.nestConfigService.get<string>('GOOGLE_CLIENT_ID');
-    const clientSecret = this.nestConfigService.get<string>(
-      'GOOGLE_CLIENT_SECRET',
-    );
-    const callbackUrl = this.nestConfigService.get<string>(
-      'GOOGLE_CALLBACK_URL',
-    );
+    return this.generateOauthConfig(OauthProvider.GOOGLE);
+  }
 
-    if (!clientId || !clientSecret || !callbackUrl) {
-      this.logger.error('Google OAuth configuration is incomplete.');
-      throw new Error('Google OAuth configuration is incomplete.');
-    }
-
-    return { clientId, clientSecret, callbackUrl };
+  get githubSecrets() {
+    return this.generateOauthConfig(OauthProvider.GITHUB);
   }
 
   get authRedirectUrl(): string {
@@ -80,5 +72,28 @@ export class ConfigService {
       this.nestConfigService.get<string>('AUTH_REDIRECT_URL') ?? '';
 
     return redirectUrl;
+  }
+
+  private generateOauthConfig(provider: OauthProvider) {
+    const clientId = this.nestConfigService.get<string>(
+      `${provider}_CLIENT_ID`,
+    );
+    const clientSecret = this.nestConfigService.get<string>(
+      `${provider}_CLIENT_SECRET`,
+    );
+    const callbackUrl = this.nestConfigService.get<string>(
+      `${provider}_CALLBACK_URL`,
+    );
+
+    if (!clientId || !clientSecret || !callbackUrl) {
+      this.logger.error(
+        `${provider} OAuth configuration is incomplete. Please check your environment variables.`,
+      );
+      throw new Error(
+        `${provider} OAuth configuration is incomplete. Please check your environment variables.`,
+      );
+    }
+
+    return { clientId, clientSecret, callbackUrl };
   }
 }

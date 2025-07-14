@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { GoogleStrategy } from './google.strategy';
-import { ConfigService } from '../../config/config.service';
+import { ConfigService } from '../../../config/services/config.service';
 import { Profile } from 'passport-google-oauth20';
 
 describe('auth/guards/google-strategy', () => {
@@ -37,6 +37,7 @@ describe('auth/guards/google-strategy', () => {
       lastName: mockProfile.name?.familyName,
       picture: mockProfile.photos?.[0].value,
       accessToken,
+      refreshToken,
     });
   });
 

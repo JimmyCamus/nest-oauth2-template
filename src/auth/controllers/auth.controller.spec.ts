@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { ConfigService } from '../../config/config.service';
+import { ConfigService } from '../../config/services/config.service';
 import { Response } from 'express';
 import { UserInterface } from '../interfaces/user.interface';
 import { CustomRequest } from '../types/request.types';
@@ -41,6 +41,7 @@ describe('auth/controllers/auth-controller', () => {
         lastName: 'User',
         picture: 'pic.jpg',
         accessToken: 'token',
+        refreshToken: 'refresh',
       };
       const req = { user: mockUser } as CustomRequest;
       const res = {

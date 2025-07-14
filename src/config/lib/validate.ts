@@ -6,14 +6,19 @@ export const validate = (
     errorMessages.push('Configuration is required');
   }
 
-  const clientId = config['GOOGLE_CLIENT_ID'];
-  const clientSecret = config['GOOGLE_CLIENT_SECRET'];
-  const callbackUrl = config['GOOGLE_CALLBACK_URL'];
+  const enabledProviders =
+    config['OAUTH_PROVIDERS']?.toString().split(',') || [];
 
-  if (!clientId || !clientSecret || !callbackUrl) {
-    errorMessages.push(
-      'GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_CALLBACK_URL must be set',
-    );
+  for (const provider of enabledProviders) {
+    const clientId = config[`${provider}_CLIENT_ID`];
+    const clientSecret = config[`${provider}_CLIENT_SECRET`];
+    const callbackUrl = config[`${provider}_CALLBACK_URL`];
+
+    if (!clientId || !clientSecret || !callbackUrl) {
+      errorMessages.push(
+        `${provider} OAuth configuration is incomplete. Please check your environment variables.`,
+      );
+    }
   }
 
   if (errorMessages.length)
