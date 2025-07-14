@@ -4,4 +4,5 @@ export interface UserInterface {
   lastName: string | undefined;
   picture: string | undefined;
   accessToken: string;
+  refreshToken: string;
 }
