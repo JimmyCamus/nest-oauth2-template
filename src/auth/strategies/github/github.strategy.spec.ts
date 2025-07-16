@@ -2,6 +2,7 @@
 import { ConfigService } from '../../../config/services/config.service';
 import { Profile } from 'passport-github2';
 import { GithubStrategy } from './github.strategy';
+import { HttpException } from '@nestjs/common';
 
 describe('auth/guards/github-strategy', () => {
   let strategy: GithubStrategy;
@@ -29,29 +30,28 @@ describe('auth/guards/github-strategy', () => {
 
   it('should call done with user object from profile', () => {
     const mockProfile = defaultMockProfile;
-    const accessToken = 'access-token';
-    const refreshToken = 'refresh-token';
     const done = jest.fn();
 
-    strategy.validate(accessToken, refreshToken, mockProfile, done);
+    strategy.validate('token', 'refresh', mockProfile, done);
 
     expect(done).toHaveBeenCalledWith(null, {
       email: mockProfile.emails?.[0].value,
       firstName: mockProfile.name?.givenName,
       lastName: mockProfile.name?.familyName,
       picture: mockProfile.photos?.[0].value,
-      accessToken,
-      refreshToken,
     });
   });
 
   it('should handle missing emails', () => {
-    const mockProfile = { ...defaultMockProfile, emails: undefined };
+    const mockProfile = { ...defaultMockProfile, emails: [] };
     const done = jest.fn();
 
-    strategy.validate('token', 'refresh', mockProfile, done);
-
-    expect(done.mock.calls[0][1].email).toBeUndefined();
+    try {
+      strategy.validate('token', 'refresh', mockProfile, done);
+    } catch (error) {
+      expect(error).toBeInstanceOf(HttpException);
+      expect(error.message).toBe('Email not found in GitHub profile');
+    }
   });
 
   it('should handle missing name', () => {

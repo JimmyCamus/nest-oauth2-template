@@ -4,10 +4,11 @@ import { ConfigService } from '../../config/services/config.service';
 import { Response } from 'express';
 import { UserInterface } from '../interfaces/user.interface';
 import { CustomRequest } from '../types/request.types';
+import { AuthService } from '../services/auth.service';
 
 describe('auth/controllers/auth-controller', () => {
   let controller: AuthController;
-  let configService: ConfigService;
+  let authService: AuthService;
 
   beforeEach(async () => {
     const mockConfigService = {
@@ -16,58 +17,54 @@ describe('auth/controllers/auth-controller', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [{ provide: ConfigService, useValue: mockConfigService }],
+      providers: [
+        { provide: ConfigService, useValue: mockConfigService },
+        {
+          provide: AuthService,
+          useValue: {
+            redirectToAuthUrl: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    configService = module.get<ConfigService>(ConfigService);
+    authService = module.get<AuthService>(AuthService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('register', () => {
-    it('should be defined and not throw', () => {
-      expect(() => controller.register()).not.toThrow();
-    });
-  });
-
   describe('googleAuthRedirect', () => {
-    it('should redirect with user email', () => {
+    it('should redirect with user email', async () => {
       const mockUser: UserInterface = {
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
         picture: 'pic.jpg',
-        accessToken: 'token',
-        refreshToken: 'refresh',
       };
       const req = { user: mockUser } as CustomRequest;
       const res = {
         redirect: jest.fn(),
       } as unknown as Response;
 
-      controller.googleAuthRedirect(req, res);
+      await controller.googleAuthRedirect(req, res);
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(res.redirect).toHaveBeenCalledWith(
-        `${configService.authRedirectUrl}?auth=${JSON.stringify(mockUser.email)}`,
-      );
+      expect(authService.redirectToAuthUrl).toHaveBeenCalledWith(req, res);
     });
 
-    it('should redirect with undefined if user is missing', () => {
+    it('should redirect with undefined if user is missing', async () => {
       const req = { user: undefined } as CustomRequest;
       const res = {
         redirect: jest.fn(),
       } as unknown as Response;
 
-      controller.googleAuthRedirect(req, res);
+      await controller.googleAuthRedirect(req, res);
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(res.redirect).toHaveBeenCalledWith(
-        `${configService.authRedirectUrl}?auth=${JSON.stringify(undefined)}`,
-      );
+      expect(authService.redirectToAuthUrl).toHaveBeenCalledWith(req, res);
     });
   });
 });

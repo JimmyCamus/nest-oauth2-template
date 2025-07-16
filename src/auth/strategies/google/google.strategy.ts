@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-google-oauth20';
 import { ConfigService } from '../../../config/services/config.service';
@@ -23,13 +23,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ) {
     const { name, emails, photos } = profile;
 
+    if (!emails?.[0].value) {
+      throw new HttpException(
+        'Email not found in Google profile',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user: UserInterface = {
       email: emails?.[0].value,
       firstName: name?.givenName,
       lastName: name?.familyName,
       picture: photos?.[0].value,
-      accessToken,
-      refreshToken,
     };
 
     done(null, user);
