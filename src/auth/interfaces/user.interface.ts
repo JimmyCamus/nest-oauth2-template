@@ -1,8 +1,6 @@
 export interface UserInterface {
-  email: string | undefined;
+  email: string;
   firstName: string | undefined;
   lastName: string | undefined;
   picture: string | undefined;
-  accessToken: string;
-  refreshToken: string;
 }

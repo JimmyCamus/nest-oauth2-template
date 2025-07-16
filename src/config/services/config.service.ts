@@ -15,6 +15,11 @@ export class ConfigService {
     private readonly logger: PinoLogger,
   ) {}
 
+  get nodeEnv(): string {
+    const env = this.nestConfigService.get<string>('NODE_ENV') || 'development';
+    return env;
+  }
+
   get port(): number {
     const port = this.nestConfigService.get<number>('PORT') || DEFAULT_PORT;
     let parsedPort = Number(port);
@@ -72,6 +77,37 @@ export class ConfigService {
       this.nestConfigService.get<string>('AUTH_REDIRECT_URL') ?? '';
 
     return redirectUrl;
+  }
+
+  get databaseConfig() {
+    const host =
+      this.nestConfigService.get<string>('DATABASE_HOST') || 'localhost';
+    const port = this.nestConfigService.get<number>('DATABASE_PORT') || 5432;
+    const username =
+      this.nestConfigService.get<string>('DATABASE_USER') || 'postgres';
+    const password =
+      this.nestConfigService.get<string>('DATABASE_PASSWORD') || '';
+    const database =
+      this.nestConfigService.get<string>('DATABASE_NAME') || 'mydatabase';
+
+    return {
+      host,
+      port,
+      username,
+      password,
+      database,
+    };
+  }
+
+  get jwtSecret(): string {
+    const secret = this.nestConfigService.get<string>('JWT_SECRET');
+
+    if (!secret) {
+      this.logger.error('JWT_SECRET is not set. Please configure it.');
+      throw new Error('JWT_SECRET is not set. Please configure it.');
+    }
+
+    return secret;
   }
 
   private generateOauthConfig(provider: OauthProvider) {

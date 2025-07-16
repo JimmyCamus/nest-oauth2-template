@@ -21,6 +21,24 @@ export const validate = (
     }
   }
 
+  const dbPort = config['DATABASE_PORT'];
+  const dbHost = config['DATABASE_HOST'];
+  const dbUsername = config['DATABASE_USER'];
+  const dbPassword = config['DATABASE_PASSWORD'];
+  const dbName = config['DATABASE_NAME'];
+
+  if (!dbPort || !dbHost || !dbUsername || !dbPassword || !dbName) {
+    errorMessages.push(
+      'Database configuration is incomplete. Please check your environment variables.',
+    );
+  }
+
+  const jwtSecret = config['JWT_SECRET'];
+
+  if (!jwtSecret) {
+    errorMessages.push('JWT_SECRET is not set. Please configure it.');
+  }
+
   if (errorMessages.length)
     throw new Error(
       `Configuration validation failed: ${errorMessages.join(', ')}`,
