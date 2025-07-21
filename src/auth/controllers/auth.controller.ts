@@ -5,6 +5,7 @@ import { GoogleGuard } from '../guards/google.guard';
 import { CustomRequest } from '../types/request.types';
 import { GithubGuard } from '../guards/github.guard';
 import { AuthService } from '../services/auth.service';
+import { TokenGuard } from '../guards/token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -28,5 +29,11 @@ export class AuthController {
   @UseGuards(GithubGuard)
   githubAuthRedirect(@Req() req: CustomRequest, @Res() res: Response) {
     return this.authService.redirectToAuthUrl(req, res);
+  }
+
+  @Get('profile')
+  @UseGuards(TokenGuard)
+  profile(@Req() req: CustomRequest) {
+    return req.user;
   }
 }

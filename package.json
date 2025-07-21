@@ -21,6 +21,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@keyv/redis": "4.6.0",
+    "@nestjs/cache-manager": "3.0.1",
     "@nestjs/common": "11.0.1",
     "@nestjs/config": "4.0.2",
     "@nestjs/core": "11.0.1",
@@ -29,6 +31,7 @@
     "@nestjs/platform-express": "11.0.1",
     "@nestjs/throttler": "6.4.0",
     "@nestjs/typeorm": "11.0.0",
+    "cache-manager": "7.0.1",
     "helmet": "8.1.0",
     "nestjs-pino": "4.4.0",
     "passport": "0.7.0",
@@ -38,7 +41,8 @@
     "pino-http": "10.5.0",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
-    "typeorm": "0.3.25"
+    "typeorm": "0.3.25",
+    "uuid": "11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.2.0",

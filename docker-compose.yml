@@ -27,7 +27,24 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  redis:
+    image: redis:8.0.3-alpine
+    container_name: nest-oauth2-template-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+
 
 volumes:
   postgres_data:
   pgadmin_data:
+  redis-data:

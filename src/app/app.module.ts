@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CacheModule } from '@nestjs/cache-manager';
+import { LoggerModule } from 'nestjs-pino';
+import { createKeyv } from '@keyv/redis';
 
 import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
 import { ConfigModule } from '.././config/config.module';
-import { LoggerModule } from 'nestjs-pino';
 import { pinoConfig } from '.././config/lib/pino';
 import { throttlerConfig } from '.././config/lib/throttler';
 import { AuthModule } from '../auth/auth.module';
@@ -26,6 +28,14 @@ import { User } from '../auth/entities/user.entity';
       }),
       inject: [ConfigService],
       imports: [ConfigModule],
+    }),
+    CacheModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        stores: [createKeyv(configService.redisUri)],
+      }),
+      inject: [ConfigService],
+      imports: [ConfigModule],
+      isGlobal: true,
     }),
     ConfigModule,
     AuthModule,
