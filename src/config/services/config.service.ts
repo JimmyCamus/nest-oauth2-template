@@ -110,6 +110,20 @@ export class ConfigService {
     return secret;
   }
 
+  get redisUri(): string {
+    const redisHost = this.nestConfigService.get<string>('REDIS_HOST');
+    const redisPassword = this.nestConfigService.get<string>('REDIS_PASSWORD');
+
+    if (!redisHost || !redisPassword) {
+      this.logger.error('REDIS config is not set. Please configure it.');
+      throw new Error('REDIS config is not set. Please configure it.');
+    }
+
+    const redisUri = `redis://:${redisPassword}@${redisHost}`;
+
+    return redisUri;
+  }
+
   private generateOauthConfig(provider: OauthProvider) {
     const clientId = this.nestConfigService.get<string>(
       `${provider}_CLIENT_ID`,

@@ -7,11 +7,14 @@ import { PinoLogger } from 'nestjs-pino';
 import { User } from '../entities/user.entity';
 import { HttpException } from '@nestjs/common';
 import { Response } from 'express';
+import { Cache } from 'cache-manager';
 
 describe('auth/services/auth-service', () => {
   let service: AuthService;
   let userRepository: jest.Mocked<UserRepository>;
   let logger: jest.Mocked<PinoLogger>;
+  let cacheManager: jest.Mocked<Cache>;
+  let jwtService: jest.Mocked<JwtService>;
 
   beforeEach(async () => {
     const mockConfigService = {
@@ -28,11 +31,17 @@ describe('auth/services/auth-service', () => {
 
     const mockJwtService = {
       signAsync: jest.fn().mockResolvedValue('mocked.jwt.token'),
+      verifyAsync: jest.fn(),
     };
 
     const mockUserRepository = {
       findUserByEmail: jest.fn().mockResolvedValue(null),
       createUser: jest.fn(),
+    };
+
+    const mockCacheManager = {
+      get: jest.fn(),
+      set: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -42,11 +51,14 @@ describe('auth/services/auth-service', () => {
         { provide: 'PinoLogger:AuthService', useValue: logger },
         { provide: JwtService, useValue: mockJwtService },
         { provide: UserRepository, useValue: mockUserRepository },
+        { provide: 'CACHE_MANAGER', useValue: mockCacheManager },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     userRepository = module.get(UserRepository);
+    cacheManager = module.get('CACHE_MANAGER');
+    jwtService = module.get(JwtService);
   });
 
   it('should be defined', () => {
@@ -131,7 +143,7 @@ describe('auth/services/auth-service', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.cookie).toHaveBeenCalledWith(
         'AUTH_TOKEN',
-        'jwt-token',
+        expect.any(String),
         expect.objectContaining({
           httpOnly: true,
           secure: true,
@@ -154,6 +166,55 @@ describe('auth/services/auth-service', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await expect(service.redirectToAuthUrl(req, res)).rejects.toThrow(
+        HttpException,
+      );
+    });
+  });
+
+  describe('getUserInfo', () => {
+    const sessionId = 'session-id';
+
+    const userInfo = {
+      email: 'test@test.com',
+      firstName: 'test',
+      lastName: 'user',
+      picture: 'http://example.com/picture.jpg',
+    };
+
+    it('should return user info from cache', async () => {
+      cacheManager.get.mockResolvedValueOnce('mocked.jwt.token');
+      jwtService.verifyAsync.mockResolvedValueOnce(userInfo);
+
+      const result = await service.getUserInfo(sessionId);
+
+      expect(result).toEqual(userInfo);
+    });
+
+    it('should throw if token is invalid in the verify process', async () => {
+      cacheManager.get.mockResolvedValueOnce('invalid.token');
+      jwtService.verifyAsync.mockRejectedValueOnce(new Error('Invalid token'));
+      await expect(service.getUserInfo(sessionId)).rejects.toThrow(
+        HttpException,
+      );
+    });
+
+    it('should throw if token have invalid user info', async () => {
+      cacheManager.get.mockResolvedValueOnce('invalid.token');
+      jwtService.verifyAsync.mockResolvedValueOnce({
+        ...userInfo,
+        email: undefined,
+      });
+      await expect(service.getUserInfo(sessionId)).rejects.toThrow(
+        HttpException,
+      );
+    });
+
+    it('should throw if token is expired', async () => {
+      cacheManager.get.mockResolvedValueOnce('invalid.token');
+      jwtService.verifyAsync.mockRejectedValueOnce(
+        new Error('TokenExpiredError'),
+      );
+      await expect(service.getUserInfo(sessionId)).rejects.toThrow(
         HttpException,
       );
     });
