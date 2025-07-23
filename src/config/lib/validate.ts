@@ -1,3 +1,5 @@
+import { ConfigException } from '../exceptions/config.exceptions';
+
 export const validate = (
   config: Record<string, unknown>,
 ): Record<string, unknown> => {
@@ -40,7 +42,7 @@ export const validate = (
   }
 
   if (errorMessages.length)
-    throw new Error(
+    throw new ConfigException(
       `Configuration validation failed: ${errorMessages.join(', ')}`,
     );
 
