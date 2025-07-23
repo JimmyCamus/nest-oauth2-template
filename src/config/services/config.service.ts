@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger, InjectPinoLogger } from 'nestjs-pino';
 import { ConfigService as NestConfigService } from '@nestjs/config';
 import { OauthProvider } from '../types/types';
+import { ConfigException } from '../exceptions/config.exceptions';
 
 const DEFAULT_PORT = 8000;
 const DEFAULT_CORS_METHODS = ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'];
@@ -104,7 +105,7 @@ export class ConfigService {
 
     if (!secret) {
       this.logger.error('JWT_SECRET is not set. Please configure it.');
-      throw new Error('JWT_SECRET is not set. Please configure it.');
+      throw ConfigException.jwtSecretNotFound();
     }
 
     return secret;
@@ -116,7 +117,7 @@ export class ConfigService {
 
     if (!redisHost || !redisPassword) {
       this.logger.error('REDIS config is not set. Please configure it.');
-      throw new Error('REDIS config is not set. Please configure it.');
+      throw ConfigException.redisConfigNotFound();
     }
 
     const redisUri = `redis://:${redisPassword}@${redisHost}`;
@@ -139,9 +140,7 @@ export class ConfigService {
       this.logger.error(
         `${provider} OAuth configuration is incomplete. Please check your environment variables.`,
       );
-      throw new Error(
-        `${provider} OAuth configuration is incomplete. Please check your environment variables.`,
-      );
+      throw ConfigException.oauthConfigNotFound(provider);
     }
 
     return { clientId, clientSecret, callbackUrl };
