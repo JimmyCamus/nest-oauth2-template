@@ -1,98 +1,150 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="90" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<h1 align="center">Nest OAuth2 Template</h1>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A robust, modular NestJS template for building secure, scalable applications with OAuth2 authentication (Google & Github), JWT, Redis, PostgreSQL, and best practices for configuration and testing.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Features
 
-## Project setup
+- **NestJS 11+** modular architecture
+- **OAuth2 authentication** with Google and Github (Passport strategies)
+- **JWT-based session management**
+- **Redis** for session and cache management
+- **PostgreSQL** as the main database (TypeORM integration)
+- **Centralized configuration** with validation and custom exceptions
+- **Logging** with [nestjs-pino](https://github.com/iamolegga/nestjs-pino)
+- **Rate limiting** with Throttler
+- **Unit and e2e testing** with mocks and real integrations
+- **Extensible structure** for adding new OAuth providers or modules
 
-```bash
-$ pnpm install
+---
+
+## Main Endpoints
+
+- `GET /health`  
+  Returns application status and uptime.
+
+- `GET /auth/google`  
+  Redirects to Google OAuth2.
+
+- `GET /auth/google/redirect`  
+  Handles Google OAuth2 callback.
+
+- `GET /auth/github`  
+  Redirects to Github OAuth2.
+
+- `GET /auth/github/redirect`  
+  Handles Github OAuth2 callback.
+
+- `GET /auth/profile`  
+  Returns authenticated user profile (requires valid JWT/session).
+
+---
+
+## Configuration
+
+All environment variables are validated at startup.  
+Example `.env` file:
+
+```
+NODE_ENV=development
+PORT=8000
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:8000/auth/google/redirect
+
+# Github OAuth
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GITHUB_CALLBACK_URL=http://localhost:8000/auth/github/redirect
+
+AUTH_REDIRECT_URL=http://localhost:8000/auth/profile
+
+# Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=yourpassword
+DATABASE_NAME=yourdb
+
+# JWT
+JWT_SECRET=your-jwt-secret
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PASSWORD=yourredispassword
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+## How to Run
 
-# watch mode
-$ pnpm run start:dev
+1. **Install dependencies:**
 
-# production mode
-$ pnpm run start:prod
-```
+   ```bash
+   pnpm install
+   ```
 
-## Run tests
+2. **Set up your `.env` file** (see example above).
 
-```bash
-# unit tests
-$ pnpm run test
+3. **Start the application:**
+   ```bash
+   pnpm start
+   ```
+   The app will run on the port specified in your `.env` (`PORT`).
 
-# e2e tests
-$ pnpm run test:e2e
+---
 
-# test coverage
-$ pnpm run test:cov
-```
+## Testing
 
-## Deployment
+- **Unit tests:**
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+  ```bash
+  pnpm test
+  ```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- **End-to-end (e2e) tests:**
+  ```bash
+  pnpm test:e2e
+  ```
+  You can use mocks for Redis and Postgres in-memory for the database to speed up CI/CD and local testing.
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+---
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Extending the Template
 
-## Resources
+- Add new OAuth providers in `src/auth/strategies/`.
+- Customize configuration validation in `src/config/lib/validate.ts`.
+- Add new endpoints and modules following the modular structure.
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Requirements
 
-## Support
+- Node.js 18+
+- PostgreSQL and Redis (or their mocks for testing)
+- pnpm package manager
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT
+
+---
+
+## Author
+
+Jeremy Camus Varela
+
+---
+
+## Contributions
+
+Pull requests and suggestions are welcome!
