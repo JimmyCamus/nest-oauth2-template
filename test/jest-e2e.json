@@ -5,5 +5,8 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "setupFilesAfterEnv": ["./config/setup-env.ts"],
+  "globalSetup": "./config/global-setup.ts",
+  "globalTeardown": "./config/global-teardown.ts"
 }
