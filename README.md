@@ -141,7 +141,7 @@ MIT
 
 ## Author
 
-Jeremy Camus Varela
+[JimmyCamus](https://github.com/JimmyCamus)
 
 ---
 
